@@ -23,11 +23,6 @@ public class Main {
 	static final int CROSSOVER_RATE = 7; // 7/10 = 70%
 	static final int MUTATION_RATE = 1; // 1/10000 = 0.01%
 
-	/**
-	 * Program entry point
-	 * @param args not used
-	 * @throws ScriptException if genes express an invalid script - should never happen, as script is validated by {@link #validateExpression(char[])}
-	 */
 	public static void main(String[] args) throws ScriptException {
 	
 		clist = new ArrayList<Chromosome>();
@@ -39,15 +34,13 @@ public class Main {
 		for (int i = 0; i < 100; i++) {
 			Chromosome chromosome = new Chromosome();
 			char[] expression = parseGenes(chromosome.genes();
-			if (validateExpression(expression)) {
-				try {
-					chromosome.score = assignScore(expression);
-					if (chromosome.score >= 0) clist.add(chromosome);
-				} catch (ArithmeticException e) {
-					System.out.println("Solution found: " + new String(expression));
-					return;
-				}
-			}
+			try {
+				chromosome.score = assignScore(expression);
+				if (chromosome.score >= 0) clist.add(chromosome);
+			} catch (ArithmeticException e) {
+				System.out.println("Solution found: " + new String(expression));
+				return;
+			} catch (ScriptException e) { continue; }
 		}
 
 		//Breed parents and evolve new offspring
@@ -62,14 +55,13 @@ public class Main {
 				else newChromosome = breedParents(parent2, parent1);
 				
 				char[] expression = parseGenes(newChromosome.genes);
-				if (!validateExpression(expression)) continue;
 				try {
 					newChromosome.score = assignScore(expression);
 					if(newChromosome.score < 0) continue;
-				} catch(ArithmeticException e) {
+				} catch (ArithmeticException e) {
 					System.out.println("Solution found: " + new String(expression));
 					return;
-				}
+				} catch (ScriptException e) { continue; }
 				clist.add(newChromosome);
 			}
 			clist.add(parent1);
@@ -156,36 +148,15 @@ public class Main {
 	}
 	
 	/**
-	 * Ensure the script expressed by the genes is valid
-	 * <p>
-	 * Script must follow the format Integer-operator-integer-etc.
-	 * @param expression the script expressed by the genes
-	 * @return true if valid script, false if not
-	 */
-	private static boolean validateExpression(char[] expression) {
-		boolean lastInt = false;
-		for (int i = 0; i < expression.length; i++) {
-			if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*') {
-				if(lastInt) lastInt = false; 
-				else return false;
-			}
-			else {
-				if(!lastInt) lastInt = true;
-				else return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
 	 * Fitness function - assigns fitness scores to chromosomes
 	 * <p>
 	 * The fitness score is the inverse of the difference between the target and the value expressed by the chromosome
 	 * @param expression mathematical expression expressed by a chromosome
 	 * @return Fitness score as determined above
-	 * @throws ScriptException raised by JS engine if script is invalid - should never happen, script validation handled by {@link #validateExpression(char[])}
+	 * @throws ScriptException raised by JS engine if script is invalid - should never happen
 	 */
 	private static float assignScore(char[] expression) throws ScriptException {
+	
 		//Execute the script with the JS engine
 		String tmp = new String(expression);
 		Object val = engine.eval(tmp);
@@ -193,8 +164,8 @@ public class Main {
 		
 		//If script produces target value
 		if (Double.isInfinite(fitnessScore)) throw new ArithmeticException();
-		
 		return fitnessScore;
+		
 	}
 
 	public class Chromosome {
@@ -202,9 +173,6 @@ public class Main {
 		private int[] genes;
 		private float score;
 		
-		/**
-		 * Create a new Chromosome object
-		 */
 		public Chromosome() {
 			genes = new int[Main.EXPRESSION_LENGTH];
 			for (int i = 0; i < genes.length; i++) genes[i] = rng.nextInt(13);
