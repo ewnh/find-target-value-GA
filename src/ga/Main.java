@@ -38,11 +38,11 @@ public class Main {
 		//Generate a list of random valid chromosomes
 		for (int i = 0; i < 100; i++) {
 			Chromosome chromosome = new Chromosome();
-			char[] expression = parseGenes(chromosome.getGenes());
+			char[] expression = parseGenes(chromosome.genes();
 			if (validateExpression(expression)) {
 				try {
-					chromosome.setScore(assignScore(expression));
-					if (chromosome.getScore() >= 0) clist.add(chromosome);
+					chromosome.score = assignScore(expression);
+					if (chromosome.score >= 0) clist.add(chromosome);
 				} catch (ArithmeticException e) {
 					System.out.println("Solution found: " + new String(expression));
 					return;
@@ -61,11 +61,11 @@ public class Main {
 				if (i == 0) newChromosome = breedParents(parent1, parent2);
 				else newChromosome = breedParents(parent2, parent1);
 				
-				char[] expression = parseGenes(newChromosome.getGenes());
+				char[] expression = parseGenes(newChromosome.genes);
 				if (!validateExpression(expression)) continue;
 				try {
-					newChromosome.setScore(assignScore(expression));
-					if(newChromosome.getScore() < 0) continue;
+					newChromosome.score = assignScore(expression);
+					if(newChromosome.score < 0) continue;
 				} catch(ArithmeticException e) {
 					System.out.println("Solution found: " + new String(expression));
 					return;
@@ -94,18 +94,18 @@ public class Main {
 			int pos = rng.nextInt(EXPRESSION_LENGTH);
 			
 			//Replace genes
-			for (int i = 0; i <= pos; i++) tempGenes[i] = chromosomeA.getGenes()[i];
-			for (int i = tempGenes.length-1; i >= pos; i--) tempGenes[i] = chromosomeB.getGenes()[i];
-			chromosomeA.setGenes(tempGenes);
+			for (int i = 0; i <= pos; i++) tempGenes[i] = chromosomeA.genes[i];
+			for (int i = tempGenes.length-1; i >= pos; i--) tempGenes[i] = chromosomeB.genes[i];
+			chromosomeA.genes = tempGenes;
 		}
 		
 		//Mutate the genes
 		for (int i = 0; i < tempGenes.length-1; i++) { 
 			int mutationChance = rng.nextInt(10000) + 1; 
 			if (mutationChance == MUTATION_RATE) {
-				tempGenes = chromosomeA.getGenes();
+				tempGenes = chromosomeA.genes;
 				tempGenes[i] += rng.nextInt(3)-1;
-				chromosomeA.setGenes(tempGenes);
+				chromosomeA.genes = tempGenes;
 			}
 		}
 		
@@ -119,7 +119,7 @@ public class Main {
 	private static Chromosome getParent() {
 		//Sum fitness scores
 		float sum = 0;
-		for (Chromosone c : clist) sum += c.getScore();
+		for (Chromosone c : clist) sum += c.score;
 		
 		//Generate random number
 		float select = rng.nextFloat() * sum;
@@ -127,7 +127,7 @@ public class Main {
 		//Select a parent
 		sum = 0;
 		for (int i = 0; i < clist.size(); i++) {
-			sum += clist.get(i).getScore();
+			sum += clist.get(i).score;
 			if (sum + 1 > select) {
 				Chromosome tmp = clist.get(i);
 				clist.remove(i);
@@ -200,30 +200,14 @@ public class Main {
 	public class Chromosome {
 
 		private int[] genes;
-		private float fitnessScore;
+		private float score;
 		
 		/**
 		 * Create a new Chromosome object
 		 */
 		public Chromosome() {
 			genes = new int[Main.EXPRESSION_LENGTH];
-			for (int i = 0; i < genes.length; i++) genes[i] = Main.rng.nextInt(13);
-		}
-		
-		public int[] getGenes() {
-			return this.genes;
-		}
-		
-		public void setGenes(int[] genes) {
-			this.genes = genes;
-		}
-	
-		public float getScore() {
-			return fitnessScore;
-		}
-	
-		public void setScore(float score) {
-			this.fitnessScore = score;
+			for (int i = 0; i < genes.length; i++) genes[i] = rng.nextInt(13);
 		}
 		
 	}
