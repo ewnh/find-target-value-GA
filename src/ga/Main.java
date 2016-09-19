@@ -30,27 +30,24 @@ public class Main {
 	 */
 	public static void main(String[] args) throws ScriptException {
 	
-		clist = new ArrayList<Chromosome>(100);
+		clist = new ArrayList<Chromosome>();
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 		rng = new Random();
 		
 		//Generate a list of random valid chromosomes
-		while (true) {
+		for (int i = 0; i < 100; i++) {
 			Chromosome chromosome = new Chromosome();
 			char[] expression = parseGenes(chromosome.getGenes());
-			if (!validateExpression(expression)) continue;
-			
-			try {
-				chromosome.setScore(assignScore(expression));
-			} catch (ArithmeticException e) {
-				System.out.println("Solution found: " + new String(expression));
-				return;
+			if (validateExpression(expression)) {
+				try {
+					chromosome.setScore(assignScore(expression));
+					if (chromosome.getScore() < 0) clist.add(chromosome);
+				} catch (ArithmeticException e) {
+					System.out.println("Solution found: " + new String(expression));
+					return;
+				}
 			}
-			
-			if (chromosome.getScore() < 0) continue;
-			if (clist.size() == 100) break;
-			else clist.add(chromosome);
 		}
 
 		//Breed parents and evolve new offspring
@@ -149,20 +146,11 @@ public class Main {
 	private static char[] parseGenes(int[] genes) {
 		char[] express = new char[EXPRESSION_LENGTH];
 		
-		for (int i = 0; i < genes.length; i++) {
-			switch(genes[i]) {
-				case 10:
-					express[i] = '+';
-					break;
-				case 11:
-					express[i] = '-';
-					break;
-				case 12:
-					express[i] = '*';
-					break;
-				default:
-					express[i] = Integer.toString(genes[i]).toCharArray()[0];
-			}
+		for (int i = 0; i < genes.legnth; i++) {
+			if (genes[i] == 10) express[i] = '+';
+			else if (genes[i] == 11) express[i] = '-';
+			else if (genes[i] == 12) express[i] = '*';
+			else express[i] = Integer.toString(genes[i]).toCharArray()[0];
 		}
 		return express;
 	}
