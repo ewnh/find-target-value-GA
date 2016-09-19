@@ -36,58 +36,40 @@ public class Main {
 		rng = new Random();
 		
 		//Generate a list of random valid chromosomes
-		while(true) {
+		while (true) {
 			Chromosome chromosome = new Chromosome();
 			char[] expression = parseGenes(chromosome.getGenes());
-			if(!validateExpression(expression)) {
-				continue;
-			}
+			if (!validateExpression(expression)) continue;
 			
 			try {
 				chromosome.setScore(assignScore(expression));
-			}
-			catch(ArithmeticException e) {
+			} catch (ArithmeticException e) {
 				System.out.println("Solution found: " + new String(expression));
 				return;
 			}
 			
-			if(chromosome.getScore() < 0) { 
-				continue; 
-			}
-			if(clist.size() == 100) { 
-				break;
-			}
-			else { 
-				clist.add(chromosome); 
-			}
+			if (chromosome.getScore() < 0) continue;
+			if (clist.size() == 100) break;
+			else clist.add(chromosome);
 		}
 
 		//Breed parents and evolve new offspring
-		while(true) {
+		while (true) {
 			Chromosome parent1 = getParent();
 			Chromosome parent2 = getParent();
 
-			for(int i = 0; i < 2; i++) {
+			for (int i = 0; i < 2; i++) {
 				Chromosome newChromosome;
 				
-				if(i == 0) {
-					newChromosome = breedParents(parent1, parent2);
-				}
-				else {
-					newChromosome = breedParents(parent2, parent1);
-				}
+				if (i == 0) newChromosome = breedParents(parent1, parent2);
+				else newChromosome = breedParents(parent2, parent1);
 				
 				char[] expression = parseGenes(newChromosome.getGenes());
-				if(!validateExpression(expression)) {
-					continue;
-				}	
+				if (!validateExpression(expression)) continue;
 				try {
 					newChromosome.setScore(assignScore(expression));
-					if(newChromosome.getScore() < 0) {
-						continue;
-					}
-				}
-				catch(ArithmeticException e) {
+					if(newChromosome.getScore() < 0) continue;
+				} catch(ArithmeticException e) {
 					System.out.println("Solution found: " + new String(expression));
 					return;
 				}
@@ -111,23 +93,19 @@ public class Main {
 		
 		//Crossover the parent's genes
 		int crossoverChance = rng.nextInt(10) + 1; 
-		if(crossoverChance <= CROSSOVER_RATE) {
+		if (crossoverChance <= CROSSOVER_RATE) {
 			int pos = rng.nextInt(EXPRESSION_LENGTH);
 			
 			//Replace genes
-			for(int i = 0; i <= pos; i++) {
-				tempGenes[i] = chromosomeA.getGenes()[i];
-			}
-			for(int i = tempGenes.length-1; i >= pos; i--) { 
-				tempGenes[i] = chromosomeB.getGenes()[i];
-			}
+			for (int i = 0; i <= pos; i++) tempGenes[i] = chromosomeA.getGenes()[i];
+			for (int i = tempGenes.length-1; i >= pos; i--) tempGenes[i] = chromosomeB.getGenes()[i];
 			chromosomeA.setGenes(tempGenes);
 		}
 		
 		//Mutate the genes
-		for(int i = 0; i < tempGenes.length-1; i++) { 
+		for (int i = 0; i < tempGenes.length-1; i++) { 
 			int mutationChance = rng.nextInt(10000) + 1; 
-			if(mutationChance == MUTATION_RATE) {
+			if (mutationChance == MUTATION_RATE) {
 				tempGenes = chromosomeA.getGenes();
 				tempGenes[i] += rng.nextInt(3)-1;
 				chromosomeA.setGenes(tempGenes);
@@ -144,18 +122,16 @@ public class Main {
 	private static Chromosome getParent() {
 		//Sum fitness scores
 		float sum = 0;
-		for(int i = 0; i < clist.size(); i++) { 
-			sum += clist.get(i).getScore();
-		}
+		for (int i = 0; i < clist.size(); i++) sum += clist.get(i).getScore();
 		
 		//Generate random number
 		float select = rng.nextFloat() * sum;
 		
 		//Select a parent
 		sum = 0;
-		for(int i = 0; i < clist.size(); i++) {
+		for (int i = 0; i < clist.size(); i++) {
 			sum += clist.get(i).getScore();
-			if(sum + 1 > select) {
+			if (sum + 1 > select) {
 				Chromosome tmp = clist.get(i);
 				clist.remove(i);
 				return tmp;
@@ -173,19 +149,19 @@ public class Main {
 	private static char[] parseGenes(int[] genes) {
 		char[] express = new char[EXPRESSION_LENGTH];
 		
-		for(int i = 0; i < genes.length; i++) {
+		for (int i = 0; i < genes.length; i++) {
 			switch(genes[i]) {
-			case 10:
-				express[i] = '+';
-				break;
-			case 11:
-				express[i] = '-';
-				break;
-			case 12:
-				express[i] = '*';
-				break;
-			default:
-				express[i] = Integer.toString(genes[i]).toCharArray()[0];
+				case 10:
+					express[i] = '+';
+					break;
+				case 11:
+					express[i] = '-';
+					break;
+				case 12:
+					express[i] = '*';
+					break;
+				default:
+					express[i] = Integer.toString(genes[i]).toCharArray()[0];
 			}
 		}
 		return express;
@@ -200,22 +176,14 @@ public class Main {
 	 */
 	private static boolean validateExpression(char[] expression) {
 		boolean lastInt = false;
-		for(int i = 0; i < expression.length; i++) {
-			if(expression[i] == '+' || expression[i] == '-' || expression[i] == '*') {
-				if(lastInt) { 
-					lastInt = false; 
-				}
-				else { 
-					return false; 
-				}
+		for (int i = 0; i < expression.length; i++) {
+			if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*') {
+				if(lastInt) lastInt = false; 
+				else return false;
 			}
 			else {
-				if(!lastInt) { 
-					lastInt = true; 
-				}
-				else { 
-					return false; 
-				}
+				if(!lastInt) lastInt = true;
+				else return false;
 			}
 		}
 		return true;
@@ -236,9 +204,7 @@ public class Main {
 		float fitnessScore = (float) (1/(TARGET_VALUE - Double.parseDouble(val.toString())));
 		
 		//If script produces target value
-		if(Double.isInfinite(fitnessScore)) { 
-			throw new ArithmeticException(); 
-		}
+		if (Double.isInfinite(fitnessScore)) throw new ArithmeticException();
 		
 		return fitnessScore;
 	}
