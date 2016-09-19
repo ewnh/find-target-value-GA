@@ -42,7 +42,7 @@ public class Main {
 			if (validateExpression(expression)) {
 				try {
 					chromosome.setScore(assignScore(expression));
-					if (chromosome.getScore() < 0) clist.add(chromosome);
+					if (chromosome.getScore() >= 0) clist.add(chromosome);
 				} catch (ArithmeticException e) {
 					System.out.println("Solution found: " + new String(expression));
 					return;
