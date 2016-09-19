@@ -119,7 +119,7 @@ public class Main {
 	private static Chromosome getParent() {
 		//Sum fitness scores
 		float sum = 0;
-		for (int i = 0; i < clist.size(); i++) sum += clist.get(i).getScore();
+		for (Chromosone c : clist) sum += c.getScore();
 		
 		//Generate random number
 		float select = rng.nextFloat() * sum;
@@ -207,10 +207,7 @@ public class Main {
 		 */
 		public Chromosome() {
 			genes = new int[Main.EXPRESSION_LENGTH];
-			
-			for(int i = 0; i < genes.length; i++) {
-				genes[i] = Main.rng.nextInt(13);
-			}
+			for (int i = 0; i < genes.length; i++) genes[i] = Main.rng.nextInt(13);
 		}
 		
 		public int[] getGenes() {
